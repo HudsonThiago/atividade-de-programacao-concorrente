@@ -22,6 +22,10 @@ public:
         this->velocidade = velocidade;
     }
 
+    int getVelocidade(){
+        return velocidade;
+    }
+
 //Cria um sinal
 signals:
     void updateGUI(int,int,int);

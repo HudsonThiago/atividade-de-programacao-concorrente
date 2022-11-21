@@ -1,10 +1,14 @@
 #include "trem.h"
 #include <QtCore>
 #include <pthread.h>
+#include <iostream>
 
-int trilho_x = 180;
-int trilho_y = 100;
-pthread_mutex_t mutex[7];
+#define NUMERO_TRILHOS 9
+
+int trilho_x = 180; //comprimento do trilho x
+int trilho_y = 100; //comprimento do trilho y
+
+pthread_mutex_t mutex[NUMERO_TRILHOS];
 
 //Construtor
 Trem::Trem(int ID, int x, int y){
@@ -12,6 +16,18 @@ Trem::Trem(int ID, int x, int y){
     this->x = x;
     this->y = y;
     velocidade = 100;
+}
+
+void fecharTrilho(int trilho, int &x, int &y, int x1, int y1){
+    if(x == x1 && y == y1){
+        pthread_mutex_lock(&mutex[trilho]);
+    }
+}
+
+void liberarTrilho(int trilho, int &x, int &y, int x1, int y1){
+    if(x == x1 && y == y1){
+        pthread_mutex_unlock(&mutex[trilho]);
+    }
 }
 
 void movimentoTrem(int ID, int &x, int &y, int tela_x, int tela_y){
@@ -23,83 +39,35 @@ void movimentoTrem(int ID, int &x, int &y, int tela_x, int tela_y){
         x+=10;
 
         if(ID == 1){
-            if(x == max_x-10 && y == tela_y){
-                pthread_mutex_lock(&mutex[0]);
-            }
+            fecharTrilho(0, x, y, max_x-10, tela_y);
+        } else if(ID == 2){
+            liberarTrilho(0, x, y, tela_x+30, tela_y);
+            fecharTrilho(1, x, y, max_x-10, tela_y);
+        } else if(ID == 3){
+            liberarTrilho(1, x, y, tela_x+30, tela_y);
+        } else if(ID == 4){
+            fecharTrilho(2, x, y, max_x-10, tela_y);
+            liberarTrilho(3, x, y, max_x-60, tela_y);
+            fecharTrilho(4, x, y, max_x-100, tela_y);
+        } else if(ID == 5){
+            liberarTrilho(2, x, y, tela_x+30, tela_y);
+            liberarTrilho(5, x, y, max_x-60, tela_y);
+            fecharTrilho(6, x, y, max_x-100, tela_y);
         }
 
-        if(ID == 2){
-            if(x == tela_x+30 && y == tela_y){
-                pthread_mutex_unlock(&mutex[0]);
-            }
-
-            if(x == max_x-10 && y == tela_y){
-                pthread_mutex_lock(&mutex[1]);
-            }
-        }
-
-        if(ID == 3){
-            if(x == tela_x+30 && y == tela_y){
-                pthread_mutex_unlock(&mutex[1]);
-            }
-        }
-
-        if(ID == 4){
-            if(x == max_x-10 && y == tela_y){
-                pthread_mutex_lock(&mutex[2]);
-            }
-
-            if(x == max_x-60 && y == tela_y){
-                pthread_mutex_unlock(&mutex[3]);
-            }
-
-            if(x == max_x-100 && y == tela_y){
-                pthread_mutex_lock(&mutex[4]);
-            }
-        }
-
-        if(ID == 5){
-            if(x == tela_x+30 && y == tela_y){
-                pthread_mutex_unlock(&mutex[2]);
-            }
-
-            if(x == max_x-60 && y == tela_y){
-                pthread_mutex_unlock(&mutex[5]);
-            }
-
-            if(x == max_x-100 && y == tela_y){
-                pthread_mutex_lock(&mutex[6]);
-            }
-        }
 
     } else if (x == max_x && y < max_y){//trilho direito
 
         y+=10;
 
-
         if(ID == 1){
-            if(x == max_x && y == max_y-10){
-                pthread_mutex_lock(&mutex[3]);
-            }
-        }
-
-
-        if(ID == 2){
-            if(x == max_x && y == max_y-10){
-                pthread_mutex_lock(&mutex[5]);
-            }
-        }
-
-        if(ID == 4){
-            if(x == max_x && y == tela_y+30){
-                pthread_mutex_unlock(&mutex[4]);
-            }
-        }
-
-        if(ID == 5){
-            if(x == max_x && y == tela_y+30){
-                pthread_mutex_unlock(&mutex[6]);
-            }
+            fecharTrilho(3, x, y, max_x, max_y-10);
+        } else if(ID == 2){
+            fecharTrilho(5, x, y, max_x, max_y-10);
+        } else if(ID == 4){
+            liberarTrilho(4, x, y, max_x, tela_y+30);
+        } else if(ID == 5){
+            liberarTrilho(6, x, y, max_x, tela_y+30);
         }
 
 
@@ -108,53 +76,20 @@ void movimentoTrem(int ID, int &x, int &y, int tela_x, int tela_y){
         x-=10;
 
         if(ID == 1){
-            if(x == max_x-30 && y == max_y){
-                pthread_mutex_unlock(&mutex[0]);
-            }
-
-            if(x == max_x-120 && y == max_y){
-                pthread_mutex_unlock(&mutex[3]);
-            }
-        }
-
-        if(ID == 2){
-            if(x == tela_x+10 && y == max_y){
-                pthread_mutex_lock(&mutex[0]);
-            }
-
-            if(x == max_x-30 && y == max_y){
-                pthread_mutex_unlock(&mutex[1]);
-            }
-
-            if(x == max_x-80 && y == max_y){
-                pthread_mutex_lock(&mutex[4]);
-            }
-
-            if(x == max_x-120 && y == max_y){
-                pthread_mutex_unlock(&mutex[5]);
-            }
-        }
-
-        if(ID == 3){
-            if(x == tela_x+10 && y == max_y){
-                pthread_mutex_lock(&mutex[1]);
-            }
-
-            if(x == max_x-80 && y == max_y){
-                pthread_mutex_lock(&mutex[6]);
-            }
-        }
-
-        if(ID == 4){
-            if(x == max_x-30 && y == max_y){
-                pthread_mutex_unlock(&mutex[2]);
-            }
-        }
-
-        if(ID == 5){
-            if(x == tela_x+10 && y == max_y){
-                pthread_mutex_lock(&mutex[2]);
-            }
+            liberarTrilho(0, x, y, max_x-30, max_y);
+            liberarTrilho(3, x, y, max_x-120, max_y);
+        } else if(ID == 2){
+            fecharTrilho(0, x, y, tela_x+10, max_y);
+            liberarTrilho(1, x, y, max_x-30, max_y);
+            fecharTrilho(4, x, y, max_x-80, max_y);
+            liberarTrilho(5, x, y, max_x-120, max_y);
+        } else if(ID == 3){
+            fecharTrilho(1, x, y, tela_x+10, max_y);
+            fecharTrilho(6, x, y, max_x-80, max_y);
+        } else if(ID == 4){
+            liberarTrilho(2, x, y, max_x-30, max_y);
+        } else if(ID == 5){
+            fecharTrilho(2, x, y, tela_x+10, max_y);
         }
 
 
@@ -163,36 +98,21 @@ void movimentoTrem(int ID, int &x, int &y, int tela_x, int tela_y){
         y-=10;
 
         if(ID == 2){
-            if(x == tela_x && y == max_y-30){
-                pthread_mutex_unlock(&mutex[4]);
-            }
+            liberarTrilho(4, x, y, tela_x, max_y-30);
+        } else if(ID == 3){
+            liberarTrilho(6, x, y, tela_x, max_y-30);
+        } else if(ID == 4){
+            fecharTrilho(3, x, y, tela_x, tela_y+10);
+        } else if(ID == 5){
+            fecharTrilho(5, x, y, tela_x, tela_y+10);
         }
-
-        if(ID == 3){
-            if(x == tela_x && y == max_y-30){
-                pthread_mutex_unlock(&mutex[6]);
-            }
-        }
-
-        if(ID == 4){
-            if(x == tela_x && y == tela_y+10){
-                pthread_mutex_lock(&mutex[3]);
-            }
-        }
-
-        if(ID == 5){
-            if(x == tela_x && y == tela_y+10){
-                pthread_mutex_lock(&mutex[5]);
-            }
-        }
-
     }
 }
 
 //Função a ser executada após executar trem->START
 void Trem::run(){
 
-    for(int i=0;i<7;i++){
+    for(int i=0;i<NUMERO_TRILHOS;i++){
         pthread_mutex_init(&mutex[i], NULL);
 
     }
@@ -236,20 +156,19 @@ void Trem::run(){
         default:
             break;
         }
+
+        int velocidadeTotal = 201;
+
         if(velocidade == 0){
             while(velocidade == 0){
                 msleep(1);
             }
         } else {
-            msleep(201-velocidade);
+            msleep(velocidadeTotal-velocidade);
         }
     }
 
-    for(int i=0;i<7;i++){
+    for(int i=0;i<NUMERO_TRILHOS;i++){
         pthread_mutex_destroy(&mutex[i]);
     }
 }
-
-
-
-

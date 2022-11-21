@@ -17,9 +17,9 @@ public:
     ~MainWindow();
 
 
-
 public slots:
     void updateInterface(int,int,int);
+
 
 private slots:
     void on_pushButton_clicked();
